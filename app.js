@@ -1,7 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 // const path = require('path');
-let items = [];
+let dayLists = ["eat"];
+let workLists = ["work"];
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -20,14 +21,32 @@ app.get("/", (req, res) => {
     };
     let day = today.toLocaleDateString("en-US", options);
    
-    res.render("list", {kindOfDay: day, itemList: items});
+    res.render("list", {listTitle: day, itemList: dayLists, action: "/"});
     
 })
 
 app.post("/", (req, res) => {
+    
     let item = req.body.newItem;
-    items.push(item);
-    res.redirect("/");
+    if(req.body.button === "Work"){
+        workLists.push(item);
+        res.redirect("/work");
+    }else{
+        dayLists.push(item);
+        res.redirect("/");
+    }
+    
+    
+})
+
+app.get("/work", (req, res) => {
+    
+    res.render("list", {listTitle: "Work", itemList: workLists, action: "/work"});
+})
+app.post("/work", (req, res) => {
+    let item = req.body.newItem;
+    workLists.push(item);
+    res.redirect("/work");
 })
 app.listen(3000, function() {
     console.log("server is working")
