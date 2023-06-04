@@ -15,20 +15,8 @@ const itemsSchema = new mongoose.Schema({
     name: String
 });
 const Item = mongoose.model("Item", itemsSchema);
+;
 
-const item2 = new Item({
-    name: "work"
-});
-const item1 = new Item({
-    name: "eat"
-});
-const item3 = new Item({
-    name: "drink"
-});
-
-Item.insertMany([item1, item2, item3]).then(()=> {
-    console.log("items saved"); 
-});
 
 const dayLists = [];
 const workLists = [];
@@ -36,7 +24,13 @@ const workLists = [];
 app.get("/", (req, res) => {
     
     let day = date.getDate();
-    res.render("list", {listTitle: day, itemList: dayLists, action: "/"});
+
+    
+    Item.find({}).then((items)=> {
+        res.render("list", {listTitle: day, itemList: items, action: "/"});
+    })
+
+    
     
 })
 
