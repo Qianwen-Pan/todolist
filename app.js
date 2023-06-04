@@ -1,26 +1,41 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-// const path = require('path');
-let dayLists = ["eat"];
-let workLists = ["work"];
+const mongoose = require("mongoose");
+const date = require(__dirname + "/date.js");
 
 const app = express();
-app.set('view engine', 'ejs');
 
-// app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
+mongoose.connect("mongodb://127.0.0.1:27017/todolistDB");
+
+const itemsSchema = new mongoose.Schema({
+    name: String
+});
+const Item = mongoose.model("Item", itemsSchema);
+
+const item2 = new Item({
+    name: "work"
+});
+const item1 = new Item({
+    name: "eat"
+});
+const item3 = new Item({
+    name: "drink"
+});
+
+Item.insertMany([item1, item2, item3]).then(()=> {
+    console.log("items saved"); 
+});
+
+const dayLists = [];
+const workLists = [];
 
 app.get("/", (req, res) => {
-    let today = new Date();
-    let options = {
-        weekday: "long",
-        day: "numeric",
-        month: "long"
-    };
-    let day = today.toLocaleDateString("en-US", options);
-   
+    
+    let day = date.getDate();
     res.render("list", {listTitle: day, itemList: dayLists, action: "/"});
     
 })
@@ -43,11 +58,7 @@ app.get("/work", (req, res) => {
     
     res.render("list", {listTitle: "Work", itemList: workLists, action: "/work"});
 })
-app.post("/work", (req, res) => {
-    let item = req.body.newItem;
-    workLists.push(item);
-    res.redirect("/work");
-})
-app.listen(3000, function() {
+
+app.listen(3000, () => {
     console.log("server is working")
 })
