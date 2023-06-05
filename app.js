@@ -17,9 +17,12 @@ const itemsSchema = new mongoose.Schema({
 const Item = mongoose.model("Item", itemsSchema);
 ;
 
+const listSchema = new mongoose.Schema({
+    name : String,
+    items : [itemsSchema]
+});
 
-const dayLists = [];
-const workLists = [];
+const List = mongoose.model("list", listSchema);
 
 app.get("/", (req, res) => {
     
@@ -28,10 +31,7 @@ app.get("/", (req, res) => {
     
     Item.find({}).then((items)=> {
         res.render("list", {listTitle: day, itemList: items, action: "/"});
-    })
-
-    
-    
+    }) 
 })
 
 app.post("/", (req, res) => {
@@ -40,8 +40,32 @@ app.post("/", (req, res) => {
     Item.create({name : item}).then(() => { console.log("saved")});
     res.redirect("/");
     
-    
-    
+})
+
+app.post("/delete", (req, res)=> {
+    const item_id = req.body.checkbox;
+    console.log(item_id);
+    Item.findByIdAndDelete({_id : item_id}).then(() => console.log("deleted"));
+    res.redirect("/");
+});
+
+app.get("/:listName", (req, res) => {
+    const listName = req.params.listName;
+    console.log(listName);
+    List.findOne({name : listName}).then((foundList) => {
+        if(!foundList){
+            //create new list
+            List.create({name: listName, items: []}).then(() => console.log("list crated"));
+            res.redirect("/" + listName);
+        }else{
+            //query
+            console.log(foundList);
+            console.log(foundList.items);
+            res.render("list", {listTitle : listName, itemList: foundList.items});
+
+        }
+    })
+
 })
 
 app.get("/work", (req, res) => {
