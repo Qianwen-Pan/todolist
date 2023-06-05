@@ -37,13 +37,9 @@ app.get("/", (req, res) => {
 app.post("/", (req, res) => {
     
     let item = req.body.newItem;
-    if(req.body.button === "Work"){
-        workLists.push(item);
-        res.redirect("/work");
-    }else{
-        dayLists.push(item);
-        res.redirect("/");
-    }
+    Item.create({name : item}).then(() => { console.log("saved")});
+    res.redirect("/");
+    
     
     
 })
