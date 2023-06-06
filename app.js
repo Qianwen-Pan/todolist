@@ -50,11 +50,8 @@ app.post("/", (req, res) => {
         res.redirect("/");
     }else{
        List.findOne({name: listName}).then((foundList) => {
-        console.log(foundList);
-        console.log(foundList.items);
         foundList.items.push(newItem);
         foundList.save();
-        console.log(foundList.items);
         res.redirect("/" + listName);
        })
     }   
@@ -62,14 +59,22 @@ app.post("/", (req, res) => {
 
 app.post("/delete", (req, res)=> {
     const item_id = req.body.checkbox;
-    // console.log(item_id);
-    Item.findByIdAndDelete({_id : item_id}).then(() => console.log("deleted"));
-    res.redirect("/");
+    const list = req.body.list;
+    
+    if(list === "Today"){
+        Item.findByIdAndDelete({_id : item_id}).then(() => console.log("deleted in Today list"));
+        res.redirect("/");
+    }else{
+        List.updateOne({name: list}, {$pull: {items: {_id : new mongoose.Types.ObjectId(item_id) }}}).then(() => console.log("deleted"));
+        res.redirect("/" + list);
+    }
+    
+    
 });
 
 app.get("/:listName", (req, res) => {
     const listName = req.params.listName;
-    console.log(listName);
+
     List.findOne({name : listName}).then((foundList) => {
         if(!foundList){
             List.create({name: listName, items: []}).then(() => console.log("list crated"));
